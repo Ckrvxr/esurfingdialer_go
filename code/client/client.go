@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"esurfingdialer/internal/network"
-	"esurfingdialer/internal/utils"
+	"esurfingdialer/code/network"
+	"esurfingdialer/code/utils"
 )
 
 type Options struct {

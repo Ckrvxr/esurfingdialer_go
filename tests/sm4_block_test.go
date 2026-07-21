@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"esurfingdialer/internal/cipher"
+	"esurfingdialer/code/cipher"
 )
 
 func TestSM4StandardVector(t *testing.T) {

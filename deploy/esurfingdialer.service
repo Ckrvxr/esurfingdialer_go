@@ -1,0 +1,16 @@
+[Unit]
+Description=ESurfingDialer - China Telecom Campus Network Authentication
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/esurfingdialer -c /etc/esurfingdialer_go/config.json
+Restart=on-failure
+RestartSec=10
+StartLimitBurst=3
+StartLimitInterval=60
+Environment=GOMAXPROCS=1
+
+[Install]
+WantedBy=multi-user.target

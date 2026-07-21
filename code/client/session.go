@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	appcipher "esurfingdialer/internal/cipher"
-	"esurfingdialer/internal/network"
-	"esurfingdialer/internal/utils"
+	appcipher "esurfingdialer/code/cipher"
+	"esurfingdialer/code/network"
+	"esurfingdialer/code/utils"
 )
 
 type Session struct {

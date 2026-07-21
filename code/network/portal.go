@@ -3,12 +3,10 @@ package network
 import (
 	"encoding/xml"
 	"fmt"
-	"io"
-	"net/url"
 	"strings"
 	"time"
 
-	"esurfingdialer/internal/utils"
+	"esurfingdialer/code/utils"
 )
 
 const (
@@ -51,21 +49,13 @@ func extractBetweenTags(content, startTag, endTag string) string {
 }
 
 func DetectConfig() ConnectivityStatus {
-	resp, err := CaptiveCheck(CaptiveURL)
+	status, raw, err := CaptiveCheck(CaptiveURL)
 	if err != nil {
 		utils.Print("🚫 Portal check failed: " + err.Error())
 		return StatusRequestError
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		utils.Print("🚫 HTTP " + fmt.Sprint(resp.StatusCode))
-		return StatusRequestError
-	}
-
-	raw, err := io.ReadAll(resp.Body)
-	if err != nil {
-		utils.Print("🚫 Read error: " + err.Error())
+	if status < 200 || status >= 300 {
+		utils.Print("🚫 HTTP " + fmt.Sprint(status))
 		return StatusRequestError
 	}
 
@@ -88,14 +78,8 @@ func DetectConfig() ConnectivityStatus {
 		return StatusRequestError
 	}
 
-	ticketURI, err := url.Parse(States.GetTicketURL())
-	if err != nil {
-		utils.Print("⚠️ Invalid portal URL: " + err.Error())
-		return StatusRequestError
-	}
-	q := ticketURI.Query()
-	userIP := q.Get("wlanuserip")
-	acIP := q.Get("wlanacip")
+	userIP := extractURLParam(States.GetTicketURL(), "wlanuserip")
+	acIP := extractURLParam(States.GetTicketURL(), "wlanacip")
 	if userIP == "" || acIP == "" {
 		utils.Print("⚠️ Portal config missing userIP or acIP")
 		return StatusRequestError
@@ -190,6 +174,20 @@ func requestVerifyCode(username, reqType, success string) bool {
 
 	resultStr := string(result.Data)
 	return strings.Contains(resultStr, `"rescode":"`+success+`"`)
+}
+
+func extractURLParam(rawURL, key string) string {
+	pattern := key + "="
+	idx := strings.Index(rawURL, pattern)
+	if idx == -1 {
+		return ""
+	}
+	start := idx + len(pattern)
+	end := strings.IndexAny(rawURL[start:], "&")
+	if end == -1 {
+		return rawURL[start:]
+	}
+	return rawURL[start : start+end]
 }
 
 func timeNowMillis() int64 {

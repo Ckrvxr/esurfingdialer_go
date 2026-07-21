@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"esurfingdialer/internal/cipher"
+	"esurfingdialer/code/cipher"
 )
 
 func TestZUCRoundTrip(t *testing.T) {

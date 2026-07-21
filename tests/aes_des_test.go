@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	"esurfingdialer/internal/cipher"
+	"esurfingdialer/code/cipher"
 )
 
 func TestAESECBRoundTrip(t *testing.T) {
