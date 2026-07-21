@@ -38,7 +38,7 @@ jobs:
           IFS=',' read -r name goarch goarm <<< "${{ matrix.target }}"
           os="${name%/*}"
           arch="${name#*/}"
-          echo "name=$name" >> $GITHUB_OUTPUT
+          echo "namearch=${os}-${arch}" >> $GITHUB_OUTPUT
           echo "os=$os" >> $GITHUB_OUTPUT
           echo "goarch=${goarch:-$arch}" >> $GITHUB_OUTPUT
           echo "goarm=$goarm" >> $GITHUB_OUTPUT
@@ -48,7 +48,7 @@ jobs:
         run: |
           ext=""
           [ "${{ steps.parse.outputs.os }}" = "windows" ] && ext=".exe"
-          out="esurfingdialer-${{ steps.parse.outputs.name }}${ext}"
+          out="esurfingdialer-${{ steps.parse.outputs.namearch }}${ext}"
 
           export GOOS="${{ steps.parse.outputs.os }}"
           export GOARCH="${{ steps.parse.outputs.goarch }}"
@@ -67,7 +67,7 @@ jobs:
         run: |
           ext=""
           [ "${{ steps.parse.outputs.os }}" = "windows" ] && ext=".exe"
-          out="esurfingdialer-${{ steps.parse.outputs.name }}${ext}"
+          out="esurfingdialer-${{ steps.parse.outputs.namearch }}${ext}"
 
           upx --lzma "$out" -o "${out}.packed" 2>/dev/null && mv "${out}.packed" "$out" || true
 
@@ -76,8 +76,8 @@ jobs:
         shell: bash
         run: |
           ver="${GITHUB_REF_NAME#v}"
-          arch="${{ steps.parse.outputs.name }}"
-          arch="${arch#linux/}"
+          arch="${{ steps.parse.outputs.namearch }}"
+          arch="${arch#linux-}"
 
           # Map to Debian arch names
           case "$arch" in
@@ -112,9 +112,9 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: esurfingdialer-${{ steps.parse.outputs.name }}
+          name: esurfingdialer-${{ steps.parse.outputs.namearch }}
           path: |
-            esurfingdialer-${{ steps.parse.outputs.name }}*
+            esurfingdialer-${{ steps.parse.outputs.namearch }}*
             *.deb
 
   release:
