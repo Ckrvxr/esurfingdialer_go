@@ -75,50 +75,10 @@ jobs:
 
           upx --lzma "$out" -o "${out}.packed" 2>/dev/null && mv "${out}.packed" "$out" || true
 
-      - name: Package deb
-        if: steps.parse.outputs.os == 'linux'
-        shell: bash
-        run: |
-          ver="${GITHUB_REF_NAME#v}"
-          arch="${{ steps.parse.outputs.namearch }}"
-          arch="${arch#linux-}"
-
-          case "$arch" in
-            amd64)   debarch=amd64 ;;
-            arm64)   debarch=arm64 ;;
-            armv6|armv7) debarch=armhf ;;
-            loong64) debarch=loong64 ;;
-            mips)    debarch=mips ;;
-            mipsle)  debarch=mipsel ;;
-            riscv64) debarch=riscv64 ;;
-            *)       debarch="$arch" ;;
-          esac
-
-          pkg="esurfingdialer_${ver}_${debarch}"
-          mkdir -p "$pkg/DEBIAN" "$pkg/usr/bin" "$pkg/usr/lib/systemd/system" "$pkg/etc/esurfingdialer_go"
-
-          {
-            echo "Package: esurfingdialer"
-            echo "Version: $ver"
-            echo "Section: net"
-            echo "Priority: optional"
-            echo "Architecture: $debarch"
-            echo "Maintainer: ESurfingDialer <dev@esurfingdialer>"
-            echo "Description: CCTP campus network dialer"
-            echo " China Telecom campus network authentication client."
-          } > "$pkg/DEBIAN/control"
-
-          cp "esurfingdialer_${ver}_linux-${arch}" "$pkg/usr/bin/esurfingdialer"
-          cp deploy/esurfingdialer.service "$pkg/usr/lib/systemd/system/"
-          dpkg-deb --build "$pkg" > /dev/null
-          rm -rf "$pkg"
-
       - uses: actions/upload-artifact@v4
         with:
           name: esurfingdialer_${{ steps.parse.outputs.namearch }}
-          path: |
-            esurfingdialer_*
-            *.deb
+          path: esurfingdialer_*
 
   release:
     needs: [build]
@@ -134,8 +94,6 @@ jobs:
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: |
-            esurfingdialer_*
-            *.deb
+          files: esurfingdialer_*
           generate_release_notes: true
           fail_on_unmatched_files: false
