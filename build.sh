@@ -30,10 +30,10 @@ for target in "${TARGETS[@]}"; do
   unset GOMIPS
   [ "$arch" = "mips" ] || [ "$arch" = "mipsle" ] && GOMIPS=softfloat
 
-  go build -ldflags="-s -w" -trimpath -o "$OUTDIR/$name" ./cmd/esurfingdialer/
+  go build -tags="nethttpomithttp2" -ldflags="-s -w" -trimpath -o "$OUTDIR/$name" ./cmd/esurfingdialer/
 
   case "$os" in
-    linux|windows) upx -9 "$OUTDIR/$name" 2>/dev/null || true ;;
+    linux|windows) upx --lzma "$OUTDIR/$name" 2>/dev/null || true ;;
   esac
 done
 
