@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bufio"
 	"crypto/md5"
 	"fmt"
 	"io"
@@ -56,7 +57,7 @@ func CaptiveCheck(url string) (int, []byte, error) {
 		}
 
 		if resp.status >= 300 && resp.status < 400 {
-			loc := resp.header["Location"]
+			loc := resp.header["location"]
 			if loc == "" {
 				return resp.status, resp.body, nil
 			}
@@ -83,6 +84,7 @@ func doRequest(method, url, body string, extra map[string]string) (*httpResp, er
 	b.WriteString("Host: " + host + "\r\n")
 	b.WriteString("User-Agent: CCTP/android64_vpn/2093\r\n")
 	b.WriteString("Accept: text/html,text/xml,application/xhtml+xml,application/x-javascript,*/*\r\n")
+	b.WriteString("Accept-Encoding: identity\r\n")
 	b.WriteString("Connection: close\r\n")
 
 	if v := States.GetClientID(); v != "" {
@@ -136,48 +138,27 @@ func splitURL(raw string) (host, port, path string) {
 }
 
 func readResponse(r io.Reader) (*httpResp, error) {
-	buf := make([]byte, 4096)
-	pos := 0
+	br := bufio.NewReader(r)
 
-	for {
-		n, err := r.Read(buf[pos:])
-		if err != nil {
-			if n == 0 {
-				break
-			}
-		}
-		pos += n
-		if pos >= 4 && buf[pos-4] == '\r' && buf[pos-3] == '\n' && buf[pos-2] == '\r' && buf[pos-1] == '\n' {
-			break
-		}
-		if n == 0 || err != nil {
-			break
-		}
+	line, err := br.ReadString('\n')
+	if err != nil {
+		return nil, fmt.Errorf("read status line: %w", err)
 	}
-
-	if pos == 0 {
-		return nil, fmt.Errorf("empty response")
-	}
-
-	data := buf[:pos]
-	headerEnd := pos
-	for i := 0; i < pos-3; i++ {
-		if data[i] == '\r' && data[i+1] == '\n' && data[i+2] == '\r' && data[i+3] == '\n' {
-			headerEnd = i
-			break
-		}
-	}
-
-	// status line
-	firstLine := string(data[:strings.Index(string(data), "\r\n")])
 	status := 0
-	if parts := strings.Fields(firstLine); len(parts) >= 2 {
+	if parts := strings.Fields(line); len(parts) >= 2 {
 		status, _ = strconv.Atoi(parts[1])
 	}
 
-	// headers
 	hdr := map[string]string{}
-	for _, line := range strings.Split(string(data[:headerEnd]), "\r\n") {
+	for {
+		line, err = br.ReadString('\n')
+		if err != nil {
+			break
+		}
+		line = strings.TrimRight(line, "\r\n")
+		if line == "" {
+			break
+		}
 		if idx := strings.Index(line, ":"); idx != -1 {
 			k := strings.TrimSpace(line[:idx])
 			v := strings.TrimSpace(line[idx+1:])
@@ -185,76 +166,32 @@ func readResponse(r io.Reader) (*httpResp, error) {
 		}
 	}
 
-	// body
-	bodyStart := headerEnd + 4
-	var respBody []byte
-
+	var body []byte
 	if cl := hdr["content-length"]; cl != "" {
 		need, _ := strconv.Atoi(cl)
-		have := pos - bodyStart
-		for have < need {
-			n, err := r.Read(buf[:])
-			if n > 0 {
-				data = append(data, buf[:n]...)
-				have += n
-			}
-			if err != nil {
-				break
-			}
-		}
-		respBody = data[bodyStart : bodyStart+need]
+		body = make([]byte, need)
+		_, err = io.ReadFull(br, body)
 	} else if hdr["transfer-encoding"] == "chunked" {
-		respBody = readChunked(data[bodyStart:], r)
+		for {
+			line, err = br.ReadString('\n')
+			if err != nil {
+				break
+			}
+			size, _ := strconv.ParseInt(strings.TrimSpace(line), 16, 64)
+			if size == 0 {
+				break
+			}
+			chunk := make([]byte, size)
+			_, err = io.ReadFull(br, chunk)
+			if err != nil {
+				break
+			}
+			body = append(body, chunk...)
+			br.ReadString('\n') // trailing CRLF
+		}
 	} else {
-		rest, _ := io.ReadAll(r)
-		respBody = append([]byte{}, data[bodyStart:]...)
-		respBody = append(respBody, rest...)
+		body, _ = io.ReadAll(br)
 	}
 
-	return &httpResp{status: status, header: hdr, body: respBody}, nil
-}
-
-func readChunked(init []byte, r io.Reader) []byte {
-	var out []byte
-	data := init
-	for {
-		lineEnd := -1
-		for i := 0; i < len(data); i++ {
-			if data[i] == '\n' {
-				lineEnd = i
-				break
-			}
-		}
-		if lineEnd == -1 {
-			n, err := r.Read(data[len(data):cap(data)])
-			if n > 0 {
-				data = data[:len(data)+n]
-			}
-			if err != nil {
-				break
-			}
-			continue
-		}
-
-		sizeStr := strings.TrimSpace(string(data[:lineEnd]))
-		size, err := strconv.ParseInt(sizeStr, 16, 64)
-		if err != nil || size == 0 {
-			break
-		}
-		data = data[lineEnd+1:]
-
-		for len(data) < int(size)+2 {
-			n, err := r.Read(data[len(data):cap(data)])
-			if n > 0 {
-				data = data[:len(data)+n]
-			}
-			if err != nil {
-				break
-			}
-		}
-
-		out = append(out, data[:size]...)
-		data = data[size+2:]
-	}
-	return out
+	return &httpResp{status: status, header: hdr, body: body}, nil
 }
