@@ -1,0 +1,5 @@
+esurfingdialer
+build/
+*.exe
+*.bin
+algo_dump_*.bin
