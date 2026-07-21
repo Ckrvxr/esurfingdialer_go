@@ -43,7 +43,7 @@ for target in "${TARGETS[@]}"; do
   name="${APP}-${os}-${namearch}${ext}"
   echo "==> $name"
 
-  export GOOS="$os" GOARCH="$goarch" GOARM="$armver"
+  export GOOS="$os" GOARCH="$goarch" GOARM="$armver" GOEXPERIMENT="nogreenteagc,nosizespecializedmalloc"
   unset GOMIPS
   [ "$goarch" = "mips" ] || [ "$goarch" = "mipsle" ] && GOMIPS=softfloat
 
