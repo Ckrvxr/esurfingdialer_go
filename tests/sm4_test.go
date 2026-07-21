@@ -1,8 +1,10 @@
-package cipher
+package tests
 
 import (
 	"encoding/hex"
 	"testing"
+
+	"esurfingdialer/internal/cipher"
 )
 
 func TestSM4CBCRoundTrip(t *testing.T) {
@@ -10,7 +12,7 @@ func TestSM4CBCRoundTrip(t *testing.T) {
 	iv, _ := hex.DecodeString("00000000000000000000000000000000")
 	plaintext := "Hello SM4-CBC! This is a test for the campus dialer."
 
-	ciph := NewSM4CBC(key, iv)
+	ciph := cipher.NewSM4CBC(key, iv)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 
@@ -23,7 +25,7 @@ func TestSM4ECBRoundTrip(t *testing.T) {
 	key, _ := hex.DecodeString("0123456789abcdeffedcba9876543210")
 	plaintext := "Hello SM4-ECB! Short msg."
 
-	ciph := NewSM4ECB(key)
+	ciph := cipher.NewSM4ECB(key)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 
@@ -36,7 +38,7 @@ func TestSM4CBCEmpty(t *testing.T) {
 	key := []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}
 	iv := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
-	ciph := NewSM4CBC(key, iv)
+	ciph := cipher.NewSM4CBC(key, iv)
 	enc := ciph.Encrypt("")
 	dec := ciph.Decrypt(enc)
 	if dec != "" {
@@ -48,9 +50,9 @@ func TestSM4CBCExactBlock(t *testing.T) {
 	key := make([]byte, 16)
 	key[0] = 0x01
 	iv := make([]byte, 16)
-	plaintext := "0123456789abcdef" // exactly 16 bytes
+	plaintext := "0123456789abcdef"
 
-	ciph := NewSM4CBC(key, iv)
+	ciph := cipher.NewSM4CBC(key, iv)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 	if dec != plaintext {

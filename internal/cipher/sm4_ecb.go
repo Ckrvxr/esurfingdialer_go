@@ -12,7 +12,7 @@ func (s *SM4ECB) Encrypt(text string) string {
 	plaintext := []byte(text)
 	padded := Pkcs7Padding(plaintext)
 
-	block, err := newSM4Block(s.key)
+	block, err := NewSM4Block(s.key)
 	if err != nil {
 		panic(err)
 	}
@@ -25,7 +25,7 @@ func (s *SM4ECB) Encrypt(text string) string {
 
 func (s *SM4ECB) Decrypt(hex string) string {
 	data := fromHex(hex)
-	block, err := newSM4Block(s.key)
+	block, err := NewSM4Block(s.key)
 	if err != nil {
 		panic(err)
 	}

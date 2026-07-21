@@ -1,7 +1,9 @@
-package cipher
+package tests
 
 import (
 	"testing"
+
+	"esurfingdialer/internal/cipher"
 )
 
 func TestPkcs7Padding(t *testing.T) {
@@ -17,11 +19,11 @@ func TestPkcs7Padding(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		padded := Pkcs7Padding(tt.input)
+		padded := cipher.Pkcs7Padding(tt.input)
 		if len(padded) != tt.expected {
 			t.Errorf("padding len: got %d, exp %d for input len %d", len(padded), tt.expected, len(tt.input))
 		}
-		unpadded, err := Pkcs7UnPadding(padded)
+		unpadded, err := cipher.Pkcs7UnPadding(padded)
 		if err != nil {
 			t.Errorf("unpadding error: %v", err)
 		}
@@ -37,12 +39,12 @@ func TestPkcs7Padding(t *testing.T) {
 }
 
 func TestPkcs7InvalidData(t *testing.T) {
-	_, err := Pkcs7UnPadding([]byte{})
+	_, err := cipher.Pkcs7UnPadding([]byte{})
 	if err == nil {
 		t.Error("expected error for empty data")
 	}
 
-	_, err = Pkcs7UnPadding([]byte{0, 1, 2})
+	_, err = cipher.Pkcs7UnPadding([]byte{0, 1, 2})
 	if err == nil {
 		t.Error("expected error for invalid padding")
 	}

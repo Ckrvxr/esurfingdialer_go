@@ -1,7 +1,9 @@
-package cipher
+package tests
 
 import (
 	"testing"
+
+	"esurfingdialer/internal/cipher"
 )
 
 func TestAESECBRoundTrip(t *testing.T) {
@@ -9,7 +11,7 @@ func TestAESECBRoundTrip(t *testing.T) {
 	key2 := []byte{0x10, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01}
 	plaintext := "Hello AES-ECB! Testing double encryption."
 
-	ciph := NewAESECB(key1, key2)
+	ciph := cipher.NewAESECB(key1, key2)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 
@@ -24,7 +26,7 @@ func TestAESCBCRoundTrip(t *testing.T) {
 	iv := []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F}
 	plaintext := "Hello AES-CBC! Testing with IV."
 
-	ciph := NewAESCBC(key1, key2, iv)
+	ciph := cipher.NewAESCBC(key1, key2, iv)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 
@@ -38,7 +40,7 @@ func TestDESedeECBRoundTrip(t *testing.T) {
 	key2 := []byte{0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10, 0x0F, 0x0E, 0x0D, 0x0C, 0x0B, 0x0A, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01}
 	plaintext := "Hello 3DES-ECB!"
 
-	ciph := NewDESedeECB(key1, key2)
+	ciph := cipher.NewDESedeECB(key1, key2)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 
@@ -53,7 +55,7 @@ func TestDESedeCBCRoundTrip(t *testing.T) {
 	iv := []byte{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08}
 	plaintext := "Hello 3DES-CBC!"
 
-	ciph := NewDESedeCBC(key1, key2, iv)
+	ciph := cipher.NewDESedeCBC(key1, key2, iv)
 	enc := ciph.Encrypt(plaintext)
 	dec := ciph.Decrypt(enc)
 

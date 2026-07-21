@@ -42,7 +42,7 @@ type sm4Block struct {
 	decRk [32]uint32
 }
 
-func newSM4Block(key []byte) (cipher.Block, error) {
+func NewSM4Block(key []byte) (cipher.Block, error) {
 	if len(key) != 16 {
 		return nil, fmt.Errorf("SM4 key must be 16 bytes, got %d", len(key))
 	}

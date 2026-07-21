@@ -1,7 +1,9 @@
-package cipher
+package tests
 
 import (
 	"testing"
+
+	"esurfingdialer/internal/cipher"
 )
 
 func TestFactoryAllAlgorithms(t *testing.T) {
@@ -21,7 +23,7 @@ func TestFactoryAllAlgorithms(t *testing.T) {
 	}
 
 	for _, a := range algos {
-		ciph, err := GetInstance(a.uuid)
+		ciph, err := cipher.GetInstance(a.uuid)
 		if err != nil {
 			t.Fatalf("GetInstance(%s) failed: %v", a.uuid, err)
 		}
@@ -35,7 +37,7 @@ func TestFactoryAllAlgorithms(t *testing.T) {
 }
 
 func TestFactoryUnknownAlgo(t *testing.T) {
-	_, err := GetInstance("00000000-0000-0000-0000-000000000000")
+	_, err := cipher.GetInstance("00000000-0000-0000-0000-000000000000")
 	if err == nil {
 		t.Fatal("expected error for unknown algorithm")
 	}
