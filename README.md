@@ -2,7 +2,7 @@
 
 ESurfingDialer 的 Go 语言移植版。无需 JRE。纯 Go 实现，零外部依赖，支持 Linux / Windows / macOS 全平台，支持 x86 / arm64 / mips 多种架构。
 
-程序大小 1MB 左右，运行平台至少需要 32 MB RAM。
+程序大小 1MB 左右，峰值内存消耗 13MB 左右，平时内存消耗 12MB，所以运行平台至少需要 32 MB RAM。
 
 ## 使用
 
