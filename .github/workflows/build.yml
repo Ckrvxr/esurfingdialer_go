@@ -48,9 +48,10 @@ jobs:
       - name: Build
         shell: bash
         run: |
+          ver="${GITHUB_REF_NAME#v}"
           ext=""
           [ "${{ steps.parse.outputs.os }}" = "windows" ] && ext=".exe"
-          out="esurfingdialer-${{ steps.parse.outputs.namearch }}${ext}"
+          out="esurfingdialer_${ver}_${{ steps.parse.outputs.namearch }}${ext}"
 
           export GOOS="${{ steps.parse.outputs.os }}"
           export GOARCH="${{ steps.parse.outputs.goarch }}"
@@ -67,9 +68,10 @@ jobs:
         if: steps.parse.outputs.os == 'linux' || steps.parse.outputs.os == 'windows'
         shell: bash
         run: |
+          ver="${GITHUB_REF_NAME#v}"
           ext=""
           [ "${{ steps.parse.outputs.os }}" = "windows" ] && ext=".exe"
-          out="esurfingdialer-${{ steps.parse.outputs.namearch }}${ext}"
+          out="esurfingdialer_${ver}_${{ steps.parse.outputs.namearch }}${ext}"
 
           upx --lzma "$out" -o "${out}.packed" 2>/dev/null && mv "${out}.packed" "$out" || true
 
@@ -81,7 +83,6 @@ jobs:
           arch="${{ steps.parse.outputs.namearch }}"
           arch="${arch#linux-}"
 
-          # Map to Debian arch names
           case "$arch" in
             amd64)   debarch=amd64 ;;
             arm64)   debarch=arm64 ;;
@@ -107,16 +108,16 @@ jobs:
             echo " China Telecom campus network authentication client."
           } > "$pkg/DEBIAN/control"
 
-          cp "esurfingdialer-linux-${arch}" "$pkg/usr/bin/esurfingdialer"
+          cp "esurfingdialer_${ver}_linux-${arch}" "$pkg/usr/bin/esurfingdialer"
           cp deploy/esurfingdialer.service "$pkg/usr/lib/systemd/system/"
           dpkg-deb --build "$pkg" > /dev/null
           rm -rf "$pkg"
 
       - uses: actions/upload-artifact@v4
         with:
-          name: esurfingdialer-${{ steps.parse.outputs.namearch }}
+          name: esurfingdialer_${{ steps.parse.outputs.namearch }}
           path: |
-            esurfingdialer-${{ steps.parse.outputs.namearch }}*
+            esurfingdialer_*
             *.deb
 
   release:
@@ -128,12 +129,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: esurfingdialer-*
+          pattern: esurfingdialer_*
           merge-multiple: true
 
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            esurfingdialer-*
+            esurfingdialer_*
             *.deb
           generate_release_notes: true
