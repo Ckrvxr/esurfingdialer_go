@@ -61,6 +61,7 @@ systemctl status esurfingdialer
 ```
 
 服务文件位于 `/usr/lib/systemd/system/esurfingdialer.service`。
+
 配置文件位于 `/etc/esurfingdialer_go/config.json`。
 
 ## 构建
