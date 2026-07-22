@@ -2,7 +2,7 @@
 
 ESurfingDialer 的 Go 语言移植版。无需 JRE。纯 Go 实现，零外部依赖，支持 Linux / Windows / macOS 全平台，支持 x86 / arm64 / mips 多种架构。
 
-程序 2MB 左右，内存消耗 10MB 左右，运行平台至少需要 64 MB RAM。
+程序 2MB 左右，内存消耗 12MB 左右，运行平台至少需要 64 MB RAM。
 
 ## 使用
 
@@ -45,7 +45,7 @@ echo '{"user":"12345678901","password":"你的密码"}' > ~/.config/esurfingdial
 ./esurfingdialer -c /etc/esurfingdialer_go/config.json
 ```
 
-## Linux Systemd （只针对 deb 包）
+## Linux Systemd
 
 对于 Linux Systemd，配置文件路径为 `/etc/esurfingdialer_go/config.json`。
 
