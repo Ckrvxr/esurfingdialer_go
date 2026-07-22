@@ -49,8 +49,6 @@ echo '{"user":"12345678901","password":"你的密码"}' > ~/.config/esurfingdial
 
 对于 Linux Systemd，配置文件路径为 `/etc/esurfingdialer_go/config.json`。
 
-安装 deb 包后：
-
 ```bash
 # 创建配置文件
 echo '{"user":"12345678901","password":"你的密码"}' > /etc/esurfingdialer_go/config.json
